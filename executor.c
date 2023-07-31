@@ -39,3 +39,14 @@ int execute_external(char **args)
     return 0;
 }
 
+/* Function to execute commands received from the user */
+int execute_commands(char **commands)
+{
+    /* Marking the parameter as unused to avoid the warning */
+    (void)commands;
+
+    /* Implement code to execute multiple commands using pipes and fork */
+    /* Return the exit status of the last executed command */
+    return 0;
+}
+
