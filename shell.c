@@ -1,7 +1,14 @@
+/* shell.c */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "shell.h"
 
+/**
+ * main - Entry point of the simple shell program.
+ *
+ * Return: Always 0.
+ */
 int main(void)
 {
 	char *line;

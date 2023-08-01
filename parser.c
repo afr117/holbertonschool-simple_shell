@@ -13,7 +13,7 @@
  * split_commands - Split the input string into separate commands.
  * @input: The input string to split.
  *
- * Return: An array of strings containing the separate commands, or NULL on failure.
+ * Return: Array of strings containing separate commands, or NULL on failure.
  *         The last element of the array is set to NULL.
  */
 char **split_commands(char *input)
