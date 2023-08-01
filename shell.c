@@ -4,27 +4,27 @@
 
 int main(void)
 {
-    char *line;
-    char **commands;
-    int status = 1; /* Shell status (1: active, 0: exit) */
+	char *line;
+	char **commands;
+	int status = 1; /* Shell status (1: active, 0: exit) */
 
-    while (status)
-    {
-        printf("($) ");
-        line = read_line(); /* Read input line */
-        if (!line)
-            break;
+	while (status)
+	{
+		printf("($) ");
+		line = read_line(); /* Read input line */
+		if (!line)
+			break;
 
-        commands = split_commands(line); /* Split input into commands */
+		commands = split_commands(line); /* Split input into commands */
 
-        if (commands)
-        {
-            status = execute_commands(commands); /* Execute commands */
-            free(commands);
-        }
-        free(line);
-    }
+		if (commands)
+		{
+			status = execute_commands(commands); /* Execute commands */
+			free(commands);
+		}
+		free(line);
+	}
 
-    return 0;
+	return (0);
 }
 
