@@ -4,7 +4,7 @@
 
 char *read_line(void)
 {
-    /* Implement function to read a line of input from the user (interactive mode) */
+/* Implement function read a line of input from user (interactive mode) */
     return NULL; /* Replace NULL with the read input line */
 }
 
