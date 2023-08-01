@@ -5,9 +5,10 @@
 /* Placeholder implementation for checking if the command is a built-in */
 int is_builtin(char *command)
 {
+    /* Compare the command with known built-in commands (cd and exit) */
 	if (strcmp(command, "cd") == 0 || strcmp(command, "exit") == 0)
 	{
-		return (1);
+		return (1); /* Return 1 if the command is a built-in, else return 0 */
 	}
 	return (0);
 }
@@ -15,7 +16,7 @@ int is_builtin(char *command)
 /* Placeholder implementation for handling built-in commands */
 void handle_builtin(char **args)
 {
-	/* Add more built-in commands if needed */
+    /* Check the command and implement corresponding built-in actions */
 	if (strcmp(args[0], "cd") == 0)
 	{
 		/* Implement 'cd' command */
