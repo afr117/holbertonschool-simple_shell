@@ -42,6 +42,6 @@ char **split_commands(char *input)
 	}
 
 	commands[i] = NULL;
-	return commands;
+	return (commands);
 }
 
