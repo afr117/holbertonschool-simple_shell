@@ -20,6 +20,5 @@ char *_strdup(char *str)
     /* Implement function to duplicate a string */
     (void)str; /* Ignore the unused parameter */
     return NULL; /* Replace NULL with the duplicated string */
-
 }
 
