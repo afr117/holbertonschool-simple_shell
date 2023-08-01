@@ -9,39 +9,39 @@
 
 char **split_commands(char *input)
 {
-    int i = 0; /* Move variable declaration to the beginning */
-    int buffer_size = COMMAND_BUFSIZE;
-    char **commands = malloc(buffer_size * sizeof(char *));
-    char *command;
+	int i = 0; /* Move variable declaration to the beginning */
+	int buffer_size = COMMAND_BUFSIZE;
+	char **commands = malloc(buffer_size * sizeof(char *));
+	char *command;
 
-    if (!commands)
-    {
-        perror("Allocation error");
-        exit(EXIT_FAILURE);
-    }
+	if (!commands)
+	{
+		perror("Allocation error");
+		exit(EXIT_FAILURE);
+	}
 
-    command = strtok(input, TOKEN_DELIMITERS);
+	command = strtok(input, TOKEN_DELIMITERS);
 
-    while (command)
-    {
-        commands[i] = command;
-        i++;
+	while (command)
+	{
+		commands[i] = command;
+		i++;
 
-        if (i >= buffer_size)
-        {
-            buffer_size += COMMAND_BUFSIZE;
-            commands = realloc(commands, buffer_size * sizeof(char *));
-            if (!commands)
-            {
-                perror("Allocation error");
-                exit(EXIT_FAILURE);
-            }
-        }
+		if (i >= buffer_size)
+		{
+			buffer_size += COMMAND_BUFSIZE;
+			commands = realloc(commands, buffer_size * sizeof(char *));
+			if (!commands)
+			{
+				perror("Allocation error");
+				exit(EXIT_FAILURE);
+			}
+		}
 
-        command = strtok(NULL, TOKEN_DELIMITERS);
-    }
+		command = strtok(NULL, TOKEN_DELIMITERS);
+	}
 
-    commands[i] = NULL;
-    return commands;
+	commands[i] = NULL;
+	return commands;
 }
 
