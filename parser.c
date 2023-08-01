@@ -1,3 +1,5 @@
+/* parser.c */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +9,13 @@
 #define COMMAND_BUFSIZE 64
 #define TOKEN_DELIMITERS " \t\r\n\a"
 
+/**
+ * split_commands - Split the input string into separate commands.
+ * @input: The input string to split.
+ *
+ * Return: An array of strings containing the separate commands, or NULL on failure.
+ *         The last element of the array is set to NULL.
+ */
 char **split_commands(char *input)
 {
 	int i = 0; /* Move variable declaration to the beginning */
