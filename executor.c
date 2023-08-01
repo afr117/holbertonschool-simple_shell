@@ -41,7 +41,12 @@ void handle_builtin(char **args)
 	}
 }
 
-/* Placeholder implementation for executing external commands */
+/**
+ * execute_external - Execute an external command using fork and execve.
+ * @args: The arguments for the external command.
+ *
+ * Return: The exit status of the executed command.
+ */
 int execute_external(char **args)
 {
 	/* Marking the parameter as unused to avoid the warning */
@@ -52,7 +57,12 @@ int execute_external(char **args)
 	return (0);
 }
 
-/* Function to execute commands received from the user */
+/**
+ * execute_commands - Execute multiple commands using pipes and fork.
+ * @commands: An array of commands to execute.
+ *
+ * Return: The exit status of the last executed command.
+ */
 int execute_commands(char **commands)
 {
 	/* Marking the parameter as unused to avoid the warning */
