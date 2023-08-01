@@ -4,7 +4,12 @@
 #include <string.h>
 #include "shell.h"
 
-/* Placeholder implementation for checking if the command is a built-in */
+/**
+ * is_builtin - Check if the command is a built-in shell command.
+ * @command: The command to check.
+ *
+ * Return: 1 if the command is a built-in, 0 otherwise.
+ */
 int is_builtin(char *command)
 {
     /* Compare the command with known built-in commands (cd and exit) */
@@ -15,7 +20,12 @@ int is_builtin(char *command)
 	return (0);
 }
 
-/* Placeholder implementation for handling built-in commands */
+/**
+ * handle_builtin - Execute the built-in shell command.
+ * @args: The arguments for the built-in command.
+ *
+ * Return: Nothing.
+ */
 void handle_builtin(char **args)
 {
     /* Check the command and implement corresponding built-in actions */
