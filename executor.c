@@ -1,6 +1,4 @@
-#include <stdio.h>
-#include <string.h>
-#include "shell.h"
+/* executor.c */
 
 /* Placeholder implementation for checking if the command is a built-in */
 int is_builtin(char *command)
@@ -49,5 +47,46 @@ int execute_commands(char **commands)
 	/* Implement code to execute multiple commands using pipes and fork */
 	/* Return the exit status of the last executed command */
 	return (0);
+}
+
+/* helper.c */
+
+/* Implement function to read a line of input from the user (interactive mode) */
+char *read_line(void)
+{
+    return NULL; /* Replace NULL with the read input line */
+}
+
+/* Implement function to read a line from a file */
+char *read_line_from_file(FILE *stream)
+{
+    (void)stream; /* Ignore the unused parameter */
+    return NULL; /* Replace NULL with the read input line from the file */
+}
+
+/* Implement function to duplicate a string */
+char *_strdup(char *str)
+{
+    (void)str; /* Ignore the unused parameter */
+    return NULL; /* Replace NULL with the duplicated string */
+}
+
+/* parser.c */
+
+/* Function to split the input into commands */
+char **split_commands(char *input)
+{
+    /* Implement code to split the input into commands */
+    /* Return the array of commands */
+    return NULL; /* Replace NULL with the array of commands */
+}
+
+/* shell.c */
+
+/* The main function for the shell */
+int main(void)
+{
+    /* Implement the main logic of the shell here */
+    return 0;
 }
 
