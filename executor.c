@@ -7,9 +7,9 @@ int is_builtin(char *command)
 {
     if (strcmp(command, "cd") == 0 || strcmp(command, "exit") == 0)
     {
-        return 1;
+        return (1);
     }
-    return 0;
+    return (0);
 }
 
 /* Placeholder implementation for handling built-in commands */
@@ -33,10 +33,10 @@ int execute_external(char **args)
 {
     /* Marking the parameter as unused to avoid the warning */
     (void)args;
-    
+
     /* Implement code to execute external commands using fork and execve */
     /* Return the exit status of the executed command */
-    return 0;
+    return (0);
 }
 
 /* Function to execute commands received from the user */
@@ -47,6 +47,6 @@ int execute_commands(char **commands)
 
     /* Implement code to execute multiple commands using pipes and fork */
     /* Return the exit status of the last executed command */
-    return 0;
+    return (0);
 }
 
