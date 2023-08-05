@@ -76,7 +76,7 @@ int main(void) {
     int status = 1; /* Shell status (1: active, 0: exit) */
 
     while (status) {
-        printf("($) ");
+        printf(":) ");
         line = lsh_read_line(); /* Read input line */
         if (!line)
             break;
@@ -84,7 +84,11 @@ int main(void) {
         args = lsh_split_line(line); /* Split input into arguments */
 
         if (args) {
-            status = lsh_execute(args); /* Execute arguments */
+            if (access(args[0], X_OK) == 0) {
+                status = lsh_execute(args); /* Execute arguments */
+            } else {
+                perror("shell");
+            }
             free(args);
         }
         free(line);
