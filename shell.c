@@ -16,7 +16,7 @@ char *lsh_read_line(void) {
     return line;
 }
 
-/* Function to split a line into individual commands */
+/* Function to split a line into tokens */
 char **lsh_split_line(char *line) {
     int bufsize = LSH_TOK_BUFSIZE, position = 0;
     char **tokens = malloc(bufsize * sizeof(char *));
@@ -48,14 +48,14 @@ char **lsh_split_line(char *line) {
 }
 
 /* Function to execute the commands */
-int lsh_execute(char **commands) {
+int lsh_execute(char **args) {
     pid_t pid;
     int status;
 
     pid = fork();
     if (pid == 0) {
         /* Child process */
-        if (execvp(commands[0], commands) == -1) {
+        if (execvp(args[0], args) == -1) {
             perror("shell");
         }
         exit(EXIT_FAILURE);
@@ -72,7 +72,7 @@ int lsh_execute(char **commands) {
 
 int main(void) {
     char *line;
-    char **commands;
+    char **args;
     int status = 1; /* Shell status (1: active, 0: exit) */
 
     while (status) {
@@ -81,11 +81,11 @@ int main(void) {
         if (!line)
             break;
 
-        commands = lsh_split_line(line); /* Split input into commands */
+        args = lsh_split_line(line); /* Split input into arguments */
 
-        if (commands) {
-            status = lsh_execute(commands); /* Execute commands */
-            free(commands);
+        if (args) {
+            status = lsh_execute(args); /* Execute arguments */
+            free(args);
         }
         free(line);
     }
