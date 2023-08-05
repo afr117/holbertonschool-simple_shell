@@ -47,24 +47,62 @@ char **lsh_split_line(char *line) {
     return tokens;
 }
 
+/* Function to search for the command in PATH */
+char *find_command(char *command) {
+    char *path = getenv("PATH");
+    char *dir, *full_path;
+
+    if (path == NULL)
+        return NULL;
+
+    dir = strtok(path, ":");
+    while (dir != NULL) {
+        full_path = malloc(strlen(dir) + strlen(command) + 2);
+        if (full_path == NULL) {
+            perror("shell");
+            exit(EXIT_FAILURE);
+        }
+        sprintf(full_path, "%s/%s", dir, command);
+
+        if (access(full_path, X_OK) == 0)
+            break;
+
+        free(full_path);
+        dir = strtok(NULL, ":");
+    }
+
+    return full_path;
+}
+
 /* Function to execute the commands */
 int lsh_execute(char **args) {
-    pid_t pid;
-    int status;
+    char *command_path;
+    if (args[0] == NULL)
+        return 1;
 
-    pid = fork();
-    if (pid == 0) {
-        /* Child process */
-        if (execvp(args[0], args) == -1) {
+    command_path = find_command(args[0]);
+    if (command_path) {
+        pid_t pid;
+        int status;
+
+        pid = fork();
+        if (pid == 0) {
+            /* Child process */
+            if (execvp(command_path, args) == -1) {
+                perror("shell");
+            }
+            exit(EXIT_FAILURE);
+        } else if (pid < 0) {
+            /* Error forking */
             perror("shell");
+        } else {
+            /* Parent process */
+            waitpid(pid, &status, 0);
         }
-        exit(EXIT_FAILURE);
-    } else if (pid < 0) {
-        /* Error forking */
-        perror("shell");
+
+        free(command_path);
     } else {
-        /* Parent process */
-        waitpid(pid, &status, 0);
+        fprintf(stderr, "shell: command not found: %s\n", args[0]);
     }
 
     return 1;
@@ -76,7 +114,7 @@ int main(void) {
     int status = 1; /* Shell status (1: active, 0: exit) */
 
     while (status) {
-        printf(":) ");
+        printf("($) ");
         line = lsh_read_line(); /* Read input line */
         if (!line)
             break;
@@ -84,11 +122,7 @@ int main(void) {
         args = lsh_split_line(line); /* Split input into arguments */
 
         if (args) {
-            if (access(args[0], X_OK) == 0) {
-                status = lsh_execute(args); /* Execute arguments */
-            } else {
-                perror("shell");
-            }
+            status = lsh_execute(args); /* Execute arguments */
             free(args);
         }
         free(line);
