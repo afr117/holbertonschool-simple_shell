@@ -47,15 +47,34 @@ char **lsh_split_line(char *line) {
     return tokens;
 }
 
+/* Function to find the command's full path in the PATH */
+char *find_command(char *command) {
+    /* Implement the logic to find the command in the PATH here */
+    /* Return the full path of the command if found, or NULL if not found */
+    /* You can use the "access" function to check if a file exists */
+    /* You'll need to tokenize the PATH environment variable and iterate over the directories */
+
+    /* Temporarily suppress the unused parameter warning */
+    (void)command;
+
+    return NULL;
+}
+
 /* Function to execute the commands */
 int lsh_execute(char **commands) {
     pid_t pid;
     int status;
 
+    char *command_path = find_command(commands[0]);
+    if (!command_path) {
+        fprintf(stderr, "shell: command not found: %s\n", commands[0]);
+        return 1;
+    }
+
     pid = fork();
     if (pid == 0) {
         /* Child process */
-        if (execvp(commands[0], commands) == -1) {
+        if (execvp(command_path, commands) == -1) {
             perror("shell");
         }
         exit(EXIT_FAILURE);
@@ -67,6 +86,7 @@ int lsh_execute(char **commands) {
         waitpid(pid, &status, 0);
     }
 
+    free(command_path);
     return 1;
 }
 
