@@ -5,6 +5,9 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#define LSH_TOK_BUFSIZE 64
+#define LSH_TOK_DELIM " \t\r\n\a"
+
 /* Function to read a line of input */
 char *lsh_read_line(void) {
     char *line = NULL;
@@ -15,28 +18,32 @@ char *lsh_read_line(void) {
 
 /* Function to split a line into individual commands */
 char **lsh_split_line(char *line) {
-    char **tokens = malloc(64 * sizeof(char *));
+    int bufsize = LSH_TOK_BUFSIZE, position = 0;
+    char **tokens = malloc(bufsize * sizeof(char *));
     char *token;
-    int index = 0;
 
     if (!tokens) {
         fprintf(stderr, "shell: allocation error\n");
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, " \t\r\n\a");
+    token = strtok(line, LSH_TOK_DELIM);
     while (token != NULL) {
-        tokens[index] = token;
-        index++;
+        tokens[position] = token;
+        position++;
 
-        if (index >= 64) {
-            fprintf(stderr, "shell: too many tokens\n");
-            exit(EXIT_FAILURE);
+        if (position >= bufsize) {
+            bufsize += LSH_TOK_BUFSIZE;
+            tokens = realloc(tokens, bufsize * sizeof(char *));
+            if (!tokens) {
+                fprintf(stderr, "shell: allocation error\n");
+                exit(EXIT_FAILURE);
+            }
         }
 
-        token = strtok(NULL, " \t\r\n\a");
+        token = strtok(NULL, LSH_TOK_DELIM);
     }
-    tokens[index] = NULL;
+    tokens[position] = NULL;
     return tokens;
 }
 
