@@ -8,35 +8,6 @@
 #define LSH_TOK_BUFSIZE 64
 #define LSH_TOK_DELIM " \t\r\n\a"
 
-char *find_command(char *command) {
-    char *path = getenv("PATH");
-    char *dir, *full_path;
-    char *copy_command = strdup(command);
-
-    while ((dir = strtok(path, ":"))) {
-        full_path = malloc(strlen(dir) + strlen(copy_command) + 2);
-        if (!full_path) {
-            perror("shell");
-            exit(EXIT_FAILURE);
-        }
-
-        strcpy(full_path, dir);
-        strcat(full_path, "/");
-        strcat(full_path, copy_command);
-
-        if (access(full_path, X_OK) == 0) {
-            free(copy_command);
-            return full_path;
-        }
-
-        free(full_path);
-        path = NULL;
-    }
-
-    free(copy_command);
-    return NULL;
-}
-
 char *lsh_read_line(void) {
     char *line = NULL;
     size_t bufsize = 0;
@@ -74,32 +45,6 @@ char **lsh_split_line(char *line) {
     return tokens;
 }
 
-int lsh_execute(char **commands) {
-    pid_t pid;
-    int status;
-    char *command_path = find_command(commands[0]);
-
-    if (command_path == NULL) {
-        fprintf(stderr, "Command not found: %s\n", commands[0]);
-        return 1;
-    }
-
-    pid = fork();
-    if (pid == 0) {
-        if (execvp(command_path, commands) == -1) {
-            perror("shell");
-            exit(EXIT_FAILURE);
-        }
-    } else if (pid < 0) {
-        perror("shell");
-    } else {
-        waitpid(pid, &status, 0);
-    }
-
-    free(command_path);
-    return 1;
-}
-
 int main(void) {
     char *line;
     char **commands;
@@ -113,7 +58,18 @@ int main(void) {
 
         commands = lsh_split_line(line);
         if (commands) {
-            status = lsh_execute(commands);
+            pid_t pid = fork();
+            if (pid == 0) {
+                if (execvp(commands[0], commands) == -1) {
+                    perror("shell");
+                    exit(EXIT_FAILURE);
+                }
+            } else if (pid < 0) {
+                perror("shell");
+            } else {
+                waitpid(pid, &status, 0);
+            }
+            
             free(commands);
         }
         free(line);
