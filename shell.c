@@ -11,9 +11,10 @@
 char *find_command(char *command) {
     char *path = getenv("PATH");
     char *dir, *full_path;
+    char *copy_command = strdup(command);
 
     while ((dir = strtok(path, ":"))) {
-        full_path = malloc(strlen(dir) + strlen(command) + 2);
+        full_path = malloc(strlen(dir) + strlen(copy_command) + 2);
         if (!full_path) {
             perror("shell");
             exit(EXIT_FAILURE);
@@ -21,9 +22,10 @@ char *find_command(char *command) {
 
         strcpy(full_path, dir);
         strcat(full_path, "/");
-        strcat(full_path, command);
+        strcat(full_path, copy_command);
 
         if (access(full_path, X_OK) == 0) {
+            free(copy_command);
             return full_path;
         }
 
@@ -31,6 +33,7 @@ char *find_command(char *command) {
         path = NULL;
     }
 
+    free(copy_command);
     return NULL;
 }
 
@@ -85,8 +88,8 @@ int lsh_execute(char **commands) {
     if (pid == 0) {
         if (execvp(command_path, commands) == -1) {
             perror("shell");
+            exit(EXIT_FAILURE);
         }
-        exit(EXIT_FAILURE);
     } else if (pid < 0) {
         perror("shell");
     } else {
@@ -116,6 +119,6 @@ int main(void) {
         free(line);
     }
 
-    return (0);
+    return 0;
 }
 
