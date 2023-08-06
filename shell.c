@@ -8,7 +8,32 @@
 #define LSH_TOK_BUFSIZE 64
 #define LSH_TOK_DELIM " \t\r\n\a"
 
-/* Function to read a line of input */
+char *find_command(char *command) {
+    char *path = getenv("PATH");
+    char *dir, *full_path;
+
+    while ((dir = strtok(path, ":"))) {
+        full_path = malloc(strlen(dir) + strlen(command) + 2);
+        if (!full_path) {
+            perror("shell");
+            exit(EXIT_FAILURE);
+        }
+
+        strcpy(full_path, dir);
+        strcat(full_path, "/");
+        strcat(full_path, command);
+
+        if (access(full_path, X_OK) == 0) {
+            return full_path;
+        }
+
+        free(full_path);
+        path = NULL;
+    }
+
+    return NULL;
+}
+
 char *lsh_read_line(void) {
     char *line = NULL;
     size_t bufsize = 0;
@@ -16,7 +41,6 @@ char *lsh_read_line(void) {
     return line;
 }
 
-/* Function to split a line into individual commands */
 char **lsh_split_line(char *line) {
     int bufsize = LSH_TOK_BUFSIZE, position = 0;
     char **tokens = malloc(bufsize * sizeof(char *));
@@ -47,42 +71,25 @@ char **lsh_split_line(char *line) {
     return tokens;
 }
 
-/* Function to find the command's full path in the PATH */
-char *find_command(char *command) {
-    /* Implement the logic to find the command in the PATH here */
-    /* Return the full path of the command if found, or NULL if not found */
-    /* You can use the "access" function to check if a file exists */
-    /* You'll need to tokenize the PATH environment variable and iterate over the directories */
-
-    /* Temporarily suppress the unused parameter warning */
-    (void)command;
-
-    return NULL;
-}
-
-/* Function to execute the commands */
 int lsh_execute(char **commands) {
     pid_t pid;
     int status;
-
     char *command_path = find_command(commands[0]);
-    if (!command_path) {
-        fprintf(stderr, "shell: command not found: %s\n", commands[0]);
+
+    if (command_path == NULL) {
+        fprintf(stderr, "Command not found: %s\n", commands[0]);
         return 1;
     }
 
     pid = fork();
     if (pid == 0) {
-        /* Child process */
         if (execvp(command_path, commands) == -1) {
             perror("shell");
         }
         exit(EXIT_FAILURE);
     } else if (pid < 0) {
-        /* Error forking */
         perror("shell");
     } else {
-        /* Parent process */
         waitpid(pid, &status, 0);
     }
 
@@ -93,18 +100,17 @@ int lsh_execute(char **commands) {
 int main(void) {
     char *line;
     char **commands;
-    int status = 1; /* Shell status (1: active, 0: exit) */
+    int status = 1;
 
     while (status) {
         printf("($) ");
-        line = lsh_read_line(); /* Read input line */
+        line = lsh_read_line();
         if (!line)
             break;
 
-        commands = lsh_split_line(line); /* Split input into commands */
-
+        commands = lsh_split_line(line);
         if (commands) {
-            status = lsh_execute(commands); /* Execute commands */
+            status = lsh_execute(commands);
             free(commands);
         }
         free(line);
