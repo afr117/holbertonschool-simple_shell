@@ -8,6 +8,49 @@
 #define LSH_TOK_BUFSIZE 64
 #define LSH_TOK_DELIM " \t\r\n\a"
 
+char *lsh_read_line(void);
+char **lsh_split_line(char *line);
+int lsh_execute(char **commands);
+
+int main(void) {
+    char *line;
+    char **commands;
+    int status = 1; /* Shell status (1: active, 0: exit) */
+
+    while (status) {
+        printf("($) ");
+        line = lsh_read_line();
+        if (!line)
+            break;
+
+        commands = lsh_split_line(line);
+        if (commands) {
+            pid_t pid;
+            int exec_status;
+
+            pid = fork();
+            if (pid == 0) {
+                /* Child process */
+                if (execvp(commands[0], commands) == -1) {
+                    perror("shell");
+                }
+                exit(EXIT_FAILURE);
+            } else if (pid < 0) {
+                /* Error forking */
+                perror("shell");
+            } else {
+                /* Parent process */
+                waitpid(pid, &exec_status, 0);
+            }
+
+            free(commands);
+        }
+        free(line);
+    }
+
+    return (0);
+}
+
 char *lsh_read_line(void) {
     char *line = NULL;
     size_t bufsize = 0;
@@ -43,38 +86,5 @@ char **lsh_split_line(char *line) {
     }
     tokens[position] = NULL;
     return tokens;
-}
-
-int main(void) {
-    char *line;
-    char **commands;
-    int status = 1;
-
-    while (status) {
-        printf("($) ");
-        line = lsh_read_line();
-        if (!line)
-            break;
-
-        commands = lsh_split_line(line);
-        if (commands) {
-            pid_t pid = fork();
-            if (pid == 0) {
-                if (execvp(commands[0], commands) == -1) {
-                    perror("shell");
-                    exit(EXIT_FAILURE);
-                }
-            } else if (pid < 0) {
-                perror("shell");
-            } else {
-                waitpid(pid, &status, 0);
-            }
-            
-            free(commands);
-        }
-        free(line);
-    }
-
-    return 0;
 }
 
