@@ -9,13 +9,17 @@
 
 char *lsh_read_line(void);
 char **lsh_split_line(char *line);
-int lsh_execute(char **commands);
+int lsh_execute(char **commands, char *full_path);
 
 int main(void) {
     char *line;
     char **commands;
     int status = 1; /* Shell status (1: active, 0: exit) */
     int i; /* Declare 'i' outside of the loop in C89 */
+    char *path, *token, *full_path;
+    int found = 0;
+    pid_t pid;
+    int exec_status;
 
     while (status) {
         printf("($) ");
@@ -25,22 +29,44 @@ int main(void) {
 
         commands = lsh_split_line(line);
         if (commands) {
-            pid_t pid;
-            int exec_status;
+            path = getenv("PATH");
+            found = 0;
+            
+            token = strtok(path, ":");
+            while (token) {
+                full_path = malloc(strlen(token) + strlen(commands[0]) + 2);
+                if (full_path) {
+                    strcpy(full_path, token);
+                    strcat(full_path, "/");
+                    strcat(full_path, commands[0]);
 
-            pid = fork();
-            if (pid == 0) {
-                /* Child process */
-                if (execvp(commands[0], commands) == -1) {
-                    perror("shell");
+                    if (access(full_path, X_OK) == 0) {
+                        found = 1;
+                        pid = fork();
+                        if (pid == 0) {
+                            /* Child process */
+                            exec_status = lsh_execute(commands, full_path);
+                            if (exec_status == -1) {
+                                fprintf(stderr, "shell: %s: execution error\n", commands[0]);
+                            }
+                            exit(EXIT_FAILURE);
+                        } else if (pid < 0) {
+                            /* Error forking */
+                            perror("shell");
+                        } else {
+                            /* Parent process */
+                            waitpid(pid, &exec_status, 0);
+                        }
+                        break;
+                    }
+                    
+                    free(full_path);
                 }
-                exit(EXIT_FAILURE);
-            } else if (pid < 0) {
-                /* Error forking */
-                perror("shell");
-            } else {
-                /* Parent process */
-                waitpid(pid, &exec_status, 0);
+                token = strtok(NULL, ":");
+            }
+            
+            if (!found) {
+                fprintf(stderr, "shell: %s: command not found\n", commands[0]);
             }
 
             for (i = 0; commands[i] != NULL; i++) {
@@ -51,6 +77,14 @@ int main(void) {
         free(line);
     }
 
+    return 0;
+}
+
+int lsh_execute(char **commands, char *full_path) {
+    if (execvp(full_path, commands) == -1) {
+        perror("shell");
+        return -1;
+    }
     return 0;
 }
 
@@ -71,7 +105,7 @@ char **lsh_split_line(char *line) {
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, " "); /* Simplified delimiter */
+    token = strtok(line, " \t\r\n\a"); /* Simplified delimiter */
     while (token != NULL) {
         tokens[position] = token;
         position++;
@@ -85,8 +119,9 @@ char **lsh_split_line(char *line) {
             }
         }
 
-        token = strtok(NULL, " "); /* Simplified delimiter */
+        token = strtok(NULL, " \t\r\n\a"); /* Simplified delimiter */
     }
     tokens[position] = NULL;
     return tokens;
 }
+
