@@ -6,7 +6,6 @@
 #include <sys/wait.h>
 
 #define LSH_TOK_BUFSIZE 64
-#define LSH_TOK_DELIM " \t\r\n\a"
 
 char *lsh_read_line(void);
 char **lsh_split_line(char *line);
@@ -72,7 +71,7 @@ char **lsh_split_line(char *line) {
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, LSH_TOK_DELIM);
+    token = strtok(line, " "); /* Simplified delimiter */
     while (token != NULL) {
         tokens[position] = token;
         position++;
@@ -86,7 +85,7 @@ char **lsh_split_line(char *line) {
             }
         }
 
-        token = strtok(NULL, LSH_TOK_DELIM);
+        token = strtok(NULL, " "); /* Simplified delimiter */
     }
     tokens[position] = NULL;
     return tokens;
