@@ -25,22 +25,26 @@ int main(void) {
 
         commands = lsh_split_line(line);
         if (commands) {
-            pid_t pid;
-            int exec_status;
-
-            pid = fork();
-            if (pid == 0) {
-                /* Child process */
-                if (execvp(commands[0], commands) == -1) {
-                    perror("shell");
-                }
-                exit(EXIT_FAILURE);
-            } else if (pid < 0) {
-                /* Error forking */
-                perror("shell");
+            if (strcmp(commands[0], "exit") == 0) {
+                status = 0; /* Set status to 0 to exit the shell */
             } else {
-                /* Parent process */
-                waitpid(pid, &exec_status, 0);
+                pid_t pid;
+                int exec_status;
+
+                pid = fork();
+                if (pid == 0) {
+                    /* Child process */
+                    if (execvp(commands[0], commands) == -1) {
+                        perror("shell");
+                    }
+                    exit(EXIT_FAILURE);
+                } else if (pid < 0) {
+                    /* Error forking */
+                    perror("shell");
+                } else {
+                    /* Parent process */
+                    waitpid(pid, &exec_status, 0);
+                }
             }
 
             for (i = 0; commands[i] != NULL; i++) {
