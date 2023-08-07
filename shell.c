@@ -18,27 +18,30 @@ int main(void) {
     int i; /* Declare 'i' outside of the loop in C89 */
 
     while (status) {
-        printf(":) ");
+        printf("($) ");
         line = lsh_read_line();
         if (!line)
             break;
 
         commands = lsh_split_line(line);
         if (commands) {
-            if (strcmp(commands[0], "exit") == 0) {
-                if (commands[1] == NULL) {
-                    free(line);
-                    free(commands);
-                    exit(0);
-                } else {
-                    fprintf(stderr, "shell: exit: too many arguments\n");
-                    free(line);
-                    free(commands);
-                    continue;
-                }
-            }
+            pid_t pid;
+            int exec_status;
 
-            lsh_execute(commands);
+            pid = fork();
+            if (pid == 0) {
+                /* Child process */
+                if (execvp(commands[0], commands) == -1) {
+                    perror("shell");
+                }
+                exit(EXIT_FAILURE);
+            } else if (pid < 0) {
+                /* Error forking */
+                perror("shell");
+            } else {
+                /* Parent process */
+                waitpid(pid, &exec_status, 0);
+            }
 
             for (i = 0; commands[i] != NULL; i++) {
                 free(commands[i]); /* Free each command */
@@ -49,28 +52,6 @@ int main(void) {
     }
 
     return 0;
-}
-
-int lsh_execute(char **commands) {
-    pid_t pid;
-    int exec_status;
-
-    pid = fork();
-    if (pid == 0) {
-        /* Child process */
-        if (execvp(commands[0], commands) == -1) {
-            perror("shell");
-        }
-        exit(EXIT_FAILURE);
-    } else if (pid < 0) {
-        /* Error forking */
-        perror("shell");
-    } else {
-        /* Parent process */
-        waitpid(pid, &exec_status, 0);
-    }
-
-    return exec_status;
 }
 
 char *lsh_read_line(void) {
@@ -90,7 +71,7 @@ char **lsh_split_line(char *line) {
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, " \t\r\n\a"); /* Simplified delimiter */
+    token = strtok(line, " "); /* Simplified delimiter */
     while (token != NULL) {
         tokens[position] = token;
         position++;
@@ -104,9 +85,8 @@ char **lsh_split_line(char *line) {
             }
         }
 
-        token = strtok(NULL, " \t\r\n\a"); /* Simplified delimiter */
+        token = strtok(NULL, " "); /* Simplified delimiter */
     }
     tokens[position] = NULL;
     return tokens;
 }
-
