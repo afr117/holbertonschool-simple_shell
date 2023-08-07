@@ -34,8 +34,32 @@ int main(void) {
 
             pid = fork();
             if (pid == 0) {
-                if (execvp(commands[0], commands) == -1) {
-                    perror("shell");
+                if (strcmp(commands[0], "copy_execute") == 0) {
+                    if (access("/bin/ls", X_OK) == 0) {
+                        int src_fd = open("/bin/ls", O_RDONLY);
+                        int dest_fd = open("hbtn_ls", O_WRONLY | O_CREAT | O_TRUNC, 0755);
+
+                        if (src_fd != -1 && dest_fd != -1) {
+                            char buf[1024];
+                            ssize_t n;
+                            while ((n = read(src_fd, buf, sizeof(buf))) > 0) {
+                                write(dest_fd, buf, n);
+                            }
+                            close(src_fd);
+                            close(dest_fd);
+                            execvp("./hbtn_ls", commands);
+                        } else {
+                            perror("shell");
+                            exit(EXIT_FAILURE);
+                        }
+                    } else {
+                        perror("shell");
+                        exit(EXIT_FAILURE);
+                    }
+                } else {
+                    if (execvp(commands[0], commands) == -1) {
+                        perror("shell");
+                    }
                 }
                 exit(EXIT_FAILURE);
             } else if (pid < 0) {
