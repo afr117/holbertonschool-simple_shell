@@ -16,6 +16,7 @@ int main(void) {
     char *line;
     char **commands;
     int status = 1; /* Shell status (1: active, 0: exit) */
+    int i; /* Declare 'i' outside of the loop */
 
     while (status) {
         printf("($) ");
@@ -33,8 +34,8 @@ int main(void) {
                 /* Child process */
                 if (execvp(commands[0], commands) == -1) {
                     perror("shell");
+                    exit(EXIT_FAILURE); /* Important: Exit the child process on error */
                 }
-                exit(EXIT_FAILURE);
             } else if (pid < 0) {
                 /* Error forking */
                 perror("shell");
@@ -43,12 +44,16 @@ int main(void) {
                 waitpid(pid, &exec_status, 0);
             }
 
+            /* Free memory allocated for commands */
+            for (i = 0; commands[i] != NULL; i++) {
+                free(commands[i]);
+            }
             free(commands);
         }
         free(line);
     }
 
-    return (0);
+    return 0; /* Return 0 to indicate successful completion */
 }
 
 char *lsh_read_line(void) {
@@ -70,7 +75,7 @@ char **lsh_split_line(char *line) {
 
     token = strtok(line, LSH_TOK_DELIM);
     while (token != NULL) {
-        tokens[position] = token;
+        tokens[position] = strdup(token); /* Duplicate the token */
         position++;
 
         if (position >= bufsize) {
