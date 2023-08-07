@@ -39,10 +39,14 @@ int main(void) {
                     continue;
                 }
             } else if (strcmp(commands[0], "env") == 0) {
-                char **env = environ;
-                while (*env) {
-                    printf("%s\n", *env);
-                    env++;
+                if (commands[1] == NULL) {
+                    char **env = environ;
+                    while (*env) {
+                        printf("%s\n", *env);
+                        env++;
+                    }
+                } else {
+                    fprintf(stderr, "shell: env: too many arguments\n");
                 }
             } else {
                 lsh_execute(commands);
@@ -117,4 +121,3 @@ char **lsh_split_line(char *line) {
     tokens[position] = NULL;
     return tokens;
 }
-
