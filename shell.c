@@ -32,8 +32,13 @@ int main(void) {
             if (pid == 0) {
                 /* Child process */
                 if (strcmp(commands[0], "exit") == 0) {
-                    status = 0; /* Set status to 0 to exit the shell */
-                    exit(0);
+                    if (commands[1] == NULL) {
+                        status = 0; /* Set status to 0 to exit the shell */
+                        exit(0);
+                    } else {
+                        fprintf(stderr, "shell: exit: too many arguments\n");
+                        exit(1);
+                    }
                 }
 
                 if (execvp(commands[0], commands) == -1) {
