@@ -11,7 +11,7 @@ extern char **environ; /* Access the external environment variable */
 
 char *lsh_read_line(void);
 char **lsh_split_line(char *line);
-int lsh_execute(char **commands);
+void lsh_execute(char **commands);
 
 int main(void) {
     char *line;
@@ -59,7 +59,7 @@ int main(void) {
     return 0;
 }
 
-int lsh_execute(char **commands) {
+void lsh_execute(char **commands) {
     pid_t pid;
     int exec_status;
 
@@ -77,8 +77,6 @@ int lsh_execute(char **commands) {
         /* Parent process */
         waitpid(pid, &exec_status, 0);
     }
-
-    return exec_status;
 }
 
 char *lsh_read_line(void) {
@@ -117,4 +115,3 @@ char **lsh_split_line(char *line) {
     tokens[position] = NULL;
     return tokens;
 }
-
