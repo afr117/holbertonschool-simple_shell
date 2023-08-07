@@ -44,10 +44,8 @@ int main(void) {
                     }
                 }
 
-                if (execvp(commands[0], commands) == -1) {
-                    perror("shell");
-                }
-                exit(EXIT_FAILURE);
+                exec_status = lsh_execute(commands);
+                exit(exec_status);
             } else if (pid < 0) {
                 /* Error forking */
                 perror("shell");
@@ -65,6 +63,28 @@ int main(void) {
     }
 
     return 0;
+}
+
+int lsh_execute(char **commands) {
+    pid_t pid;
+    int exec_status;
+
+    pid = fork();
+    if (pid == 0) {
+        /* Child process */
+        if (execvp(commands[0], commands) == -1) {
+            perror("shell");
+        }
+        exit(EXIT_FAILURE);
+    } else if (pid < 0) {
+        /* Error forking */
+        perror("shell");
+    } else {
+        /* Parent process */
+        waitpid(pid, &exec_status, 0);
+    }
+
+    return exec_status;
 }
 
 char *lsh_read_line(void) {
@@ -103,4 +123,3 @@ char **lsh_split_line(char *line) {
     tokens[position] = NULL;
     return tokens;
 }
-
