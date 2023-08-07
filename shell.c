@@ -4,11 +4,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <errno.h>
 
 #define LSH_TOK_BUFSIZE 64
 
-extern char **environ;
+extern char **environ; /* Access the external environment variable */
 
 char *lsh_read_line(void);
 char **lsh_split_line(char *line);
@@ -40,8 +39,10 @@ int main(void) {
                     continue;
                 }
             } else if (strcmp(commands[0], "env") == 0) {
-                for (i = 0; environ[i] != NULL; i++) {
-                    printf("%s\n", environ[i]);
+                char **env = environ;
+                while (*env) {
+                    printf("%s\n", *env);
+                    env++;
                 }
             } else {
                 lsh_execute(commands);
