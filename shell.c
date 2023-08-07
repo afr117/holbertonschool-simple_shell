@@ -9,17 +9,13 @@
 
 char *lsh_read_line(void);
 char **lsh_split_line(char *line);
-int lsh_execute(char **commands, char *full_path);
+int lsh_execute(char **commands);
 
 int main(void) {
     char *line;
     char **commands;
     int status = 1; /* Shell status (1: active, 0: exit) */
     int i; /* Declare 'i' outside of the loop in C89 */
-    char *path, *token, *full_path;
-    int found = 0;
-    pid_t pid;
-    int exec_status;
 
     while (status) {
         printf("($) ");
@@ -29,9 +25,12 @@ int main(void) {
 
         commands = lsh_split_line(line);
         if (commands) {
+            pid_t pid;
+            int exec_status;
+            int found = 0;
+            char *path, *token, *full_path;
+
             path = getenv("PATH");
-            found = 0;
-            
             token = strtok(path, ":");
             while (token) {
                 full_path = malloc(strlen(token) + strlen(commands[0]) + 2);
@@ -45,9 +44,8 @@ int main(void) {
                         pid = fork();
                         if (pid == 0) {
                             /* Child process */
-                            exec_status = lsh_execute(commands, full_path);
-                            if (exec_status == -1) {
-                                fprintf(stderr, "shell: %s: execution error\n", commands[0]);
+                            if (execvp(full_path, commands) == -1) {
+                                perror("shell");
                             }
                             exit(EXIT_FAILURE);
                         } else if (pid < 0) {
@@ -59,12 +57,12 @@ int main(void) {
                         }
                         break;
                     }
-                    
+
                     free(full_path);
                 }
                 token = strtok(NULL, ":");
             }
-            
+
             if (!found) {
                 fprintf(stderr, "shell: %s: command not found\n", commands[0]);
             }
@@ -77,14 +75,6 @@ int main(void) {
         free(line);
     }
 
-    return 0;
-}
-
-int lsh_execute(char **commands, char *full_path) {
-    if (execvp(full_path, commands) == -1) {
-        perror("shell");
-        return -1;
-    }
     return 0;
 }
 
