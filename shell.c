@@ -4,10 +4,6 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <signal.h>
-#include <fcntl.h>
-#include <dirent.h>
-#include <sys/stat.h>
 
 #define LSH_TOK_BUFSIZE 64
 
@@ -18,8 +14,8 @@ int lsh_execute(char **commands);
 int main(void) {
     char *line;
     char **commands;
-    int status = 1;
-    int i;
+    int status = 1; /* Shell status (1: active, 0: exit) */
+    int i; /* Declare 'i' outside of the loop in C89 */
 
     while (status) {
         printf("($) ");
@@ -34,42 +30,21 @@ int main(void) {
 
             pid = fork();
             if (pid == 0) {
-                if (strcmp(commands[0], "copy_execute") == 0) {
-                    if (access("/bin/ls", X_OK) == 0) {
-                        int src_fd = open("/bin/ls", O_RDONLY);
-                        int dest_fd = open("hbtn_ls", O_WRONLY | O_CREAT | O_TRUNC, 0755);
-
-                        if (src_fd != -1 && dest_fd != -1) {
-                            char buf[1024];
-                            ssize_t n;
-                            while ((n = read(src_fd, buf, sizeof(buf))) > 0) {
-                                write(dest_fd, buf, n);
-                            }
-                            close(src_fd);
-                            close(dest_fd);
-                            execvp("./hbtn_ls", commands);
-                        } else {
-                            perror("shell");
-                            exit(EXIT_FAILURE);
-                        }
-                    } else {
-                        perror("shell");
-                        exit(EXIT_FAILURE);
-                    }
-                } else {
-                    if (execvp(commands[0], commands) == -1) {
-                        perror("shell");
-                    }
+                /* Child process */
+                if (execvp(commands[0], commands) == -1) {
+                    perror("shell");
                 }
                 exit(EXIT_FAILURE);
             } else if (pid < 0) {
+                /* Error forking */
                 perror("shell");
             } else {
+                /* Parent process */
                 waitpid(pid, &exec_status, 0);
             }
 
             for (i = 0; commands[i] != NULL; i++) {
-                free(commands[i]);
+                free(commands[i]); /* Free each command */
             }
             free(commands);
         }
@@ -92,11 +67,11 @@ char **lsh_split_line(char *line) {
     char *token;
 
     if (!tokens) {
-        perror("shell: allocation error");
+        fprintf(stderr, "shell: allocation error\n");
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, " \t\r\n\a");
+    token = strtok(line, " "); /* Simplified delimiter */
     while (token != NULL) {
         tokens[position] = token;
         position++;
@@ -105,12 +80,12 @@ char **lsh_split_line(char *line) {
             bufsize += LSH_TOK_BUFSIZE;
             tokens = realloc(tokens, bufsize * sizeof(char *));
             if (!tokens) {
-                perror("shell: allocation error");
+                fprintf(stderr, "shell: allocation error\n");
                 exit(EXIT_FAILURE);
             }
         }
 
-        token = strtok(NULL, " \t\r\n\a");
+        token = strtok(NULL, " "); /* Simplified delimiter */
     }
     tokens[position] = NULL;
     return tokens;
