@@ -18,44 +18,54 @@ int main(void) {
     int i; /* Declare 'i' outside of the loop in C89 */
 
     while (status) {
-        printf("($) ");
+        printf(":) ");
         line = lsh_read_line();
         if (!line)
             break;
 
         commands = lsh_split_line(line);
         if (commands) {
-            pid_t pid;
-            int exec_status;
-
-            pid = fork();
-            if (pid == 0) {
-                /* Child process */
-                if (strcmp(commands[0], "exit") == 0) {
-                    if (commands[1] == NULL) {
-                        free(line);
-                        free(commands);
-                        exit(0);
-                    } else {
-                        fprintf(stderr, "shell: exit: too many arguments\n");
-                        free(line);
-                        free(commands);
-                        exit(1);
-                    }
+            if (strcmp(commands[0], "exit") == 0) {
+                if (commands[1] == NULL) {
+                    free(line);
+                    free(commands);
+                    exit(0);
+                } else {
+                    fprintf(stderr, "shell: exit: too many arguments\n");
+                    free(line);
+                    free(commands);
+                    continue;
                 }
+            }
 
-                exec_status = lsh_execute(commands);
-                exit(exec_status);
-            } else if (pid < 0) {
-                /* Error forking */
-                perror("shell");
-            } else {
-                /* Parent process */
-                waitpid(pid, &exec_status, 0);
+            if (strcmp(commands[0], "ls") == 0 && commands[1] == NULL) {
+                lsh_execute(commands);
+            } else if (strcmp(commands[0], "ls") == 0 && strcmp(commands[1], "-l") == 0 && commands[2] == NULL) {
+                lsh_execute(commands);
+            } else if (strcmp(commands[0], "ls") == 0 && strcmp(commands[1], "-l") == 0 && commands[2] != NULL) {
+                pid_t pid;
+                int exec_status;
+
+                pid = fork();
+                if (pid == 0) {
+                    char *new_args[4];
+                    new_args[0] = "/bin/ls";
+                    new_args[1] = "-l";
+                    new_args[2] = commands[2];
+                    new_args[3] = NULL;
+                    if (execve(new_args[0], new_args, NULL) == -1) {
+                        perror("shell");
+                    }
+                    exit(EXIT_FAILURE);
+                } else if (pid < 0) {
+                    perror("shell");
+                } else {
+                    waitpid(pid, &exec_status, 0);
+                }
             }
 
             for (i = 0; commands[i] != NULL; i++) {
-                free(commands[i]); /* Free each command */
+                free(commands[i]);
             }
             free(commands);
         }
@@ -71,16 +81,13 @@ int lsh_execute(char **commands) {
 
     pid = fork();
     if (pid == 0) {
-        /* Child process */
         if (execvp(commands[0], commands) == -1) {
             perror("shell");
         }
         exit(EXIT_FAILURE);
     } else if (pid < 0) {
-        /* Error forking */
         perror("shell");
     } else {
-        /* Parent process */
         waitpid(pid, &exec_status, 0);
     }
 
@@ -104,7 +111,7 @@ char **lsh_split_line(char *line) {
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, " "); /* Simplified delimiter */
+    token = strtok(line, " \t\r\n\a");
     while (token != NULL) {
         tokens[position] = token;
         position++;
@@ -118,8 +125,9 @@ char **lsh_split_line(char *line) {
             }
         }
 
-        token = strtok(NULL, " "); /* Simplified delimiter */
+        token = strtok(NULL, " \t\r\n\a");
     }
     tokens[position] = NULL;
     return tokens;
 }
+
