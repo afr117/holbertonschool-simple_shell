@@ -37,7 +37,7 @@ int main(void) {
                         exit(0);
                     } else {
                         fprintf(stderr, "shell: exit: too many arguments\n");
-                        exit(1);
+                        exit(EXIT_FAILURE);
                     }
                 }
 
@@ -100,4 +100,3 @@ char **lsh_split_line(char *line) {
     tokens[position] = NULL;
     return tokens;
 }
-
