@@ -34,8 +34,8 @@ int main(void) {
                 /* Child process */
                 if (execvp(commands[0], commands) == -1) {
                     perror("shell");
-                    exit(EXIT_FAILURE); /* Important: Exit the child process on error */
                 }
+                exit(EXIT_FAILURE);
             } else if (pid < 0) {
                 /* Error forking */
                 perror("shell");
@@ -44,16 +44,15 @@ int main(void) {
                 waitpid(pid, &exec_status, 0);
             }
 
-            /* Free memory allocated for commands */
             for (i = 0; commands[i] != NULL; i++) {
-                free(commands[i]);
+                free(commands[i]); /* Free each command */
             }
             free(commands);
         }
         free(line);
     }
 
-    return 0; /* Return 0 to indicate successful completion */
+    return 0;
 }
 
 char *lsh_read_line(void) {
@@ -75,7 +74,7 @@ char **lsh_split_line(char *line) {
 
     token = strtok(line, LSH_TOK_DELIM);
     while (token != NULL) {
-        tokens[position] = strdup(token); /* Duplicate the token */
+        tokens[position] = token;
         position++;
 
         if (position >= bufsize) {
