@@ -4,6 +4,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
 #define LSH_TOK_BUFSIZE 64
 
@@ -14,8 +18,8 @@ int lsh_execute(char **commands);
 int main(void) {
     char *line;
     char **commands;
-    int status = 1; /* Shell status (1: active, 0: exit) */
-    int i; /* Declare 'i' outside of the loop in C89 */
+    int status = 1;
+    int i;
 
     while (status) {
         printf("($) ");
@@ -30,21 +34,18 @@ int main(void) {
 
             pid = fork();
             if (pid == 0) {
-                /* Child process */
                 if (execvp(commands[0], commands) == -1) {
                     perror("shell");
                 }
                 exit(EXIT_FAILURE);
             } else if (pid < 0) {
-                /* Error forking */
                 perror("shell");
             } else {
-                /* Parent process */
                 waitpid(pid, &exec_status, 0);
             }
 
             for (i = 0; commands[i] != NULL; i++) {
-                free(commands[i]); /* Free each command */
+                free(commands[i]);
             }
             free(commands);
         }
@@ -67,11 +68,11 @@ char **lsh_split_line(char *line) {
     char *token;
 
     if (!tokens) {
-        fprintf(stderr, "shell: allocation error\n");
+        perror("shell: allocation error");
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, " "); /* Simplified delimiter */
+    token = strtok(line, " \t\r\n\a");
     while (token != NULL) {
         tokens[position] = token;
         position++;
@@ -80,12 +81,12 @@ char **lsh_split_line(char *line) {
             bufsize += LSH_TOK_BUFSIZE;
             tokens = realloc(tokens, bufsize * sizeof(char *));
             if (!tokens) {
-                fprintf(stderr, "shell: allocation error\n");
+                perror("shell: allocation error");
                 exit(EXIT_FAILURE);
             }
         }
 
-        token = strtok(NULL, " "); /* Simplified delimiter */
+        token = strtok(NULL, " \t\r\n\a");
     }
     tokens[position] = NULL;
     return tokens;
