@@ -48,6 +48,7 @@ int main(void) {
 
                 pid = fork();
                 if (pid == 0) {
+                    /* Child process */
                     char *new_args[4];
                     new_args[0] = "/bin/ls";
                     new_args[1] = "-l";
@@ -58,14 +59,16 @@ int main(void) {
                     }
                     exit(EXIT_FAILURE);
                 } else if (pid < 0) {
+                    /* Error forking */
                     perror("shell");
                 } else {
+                    /* Parent process */
                     waitpid(pid, &exec_status, 0);
                 }
             }
 
             for (i = 0; commands[i] != NULL; i++) {
-                free(commands[i]);
+                free(commands[i]); /* Free each command */
             }
             free(commands);
         }
@@ -81,13 +84,16 @@ int lsh_execute(char **commands) {
 
     pid = fork();
     if (pid == 0) {
+        /* Child process */
         if (execvp(commands[0], commands) == -1) {
             perror("shell");
         }
         exit(EXIT_FAILURE);
     } else if (pid < 0) {
+        /* Error forking */
         perror("shell");
     } else {
+        /* Parent process */
         waitpid(pid, &exec_status, 0);
     }
 
@@ -111,7 +117,7 @@ char **lsh_split_line(char *line) {
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, " \t\r\n\a");
+    token = strtok(line, " \t\r\n\a"); /* Simplified delimiter */
     while (token != NULL) {
         tokens[position] = token;
         position++;
@@ -125,7 +131,7 @@ char **lsh_split_line(char *line) {
             }
         }
 
-        token = strtok(NULL, " \t\r\n\a");
+        token = strtok(NULL, " \t\r\n\a"); /* Simplified delimiter */
     }
     tokens[position] = NULL;
     return tokens;
