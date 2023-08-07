@@ -27,44 +27,20 @@ int main(void) {
         if (commands) {
             pid_t pid;
             int exec_status;
-            int found = 0;
-            char *path, *token, *full_path;
 
-            path = getenv("PATH");
-            token = strtok(path, ":");
-            while (token) {
-                full_path = malloc(strlen(token) + strlen(commands[0]) + 2);
-                if (full_path) {
-                    strcpy(full_path, token);
-                    strcat(full_path, "/");
-                    strcat(full_path, commands[0]);
-
-                    if (access(full_path, X_OK) == 0) {
-                        found = 1;
-                        pid = fork();
-                        if (pid == 0) {
-                            /* Child process */
-                            if (execvp(full_path, commands) == -1) {
-                                perror("shell");
-                            }
-                            exit(EXIT_FAILURE);
-                        } else if (pid < 0) {
-                            /* Error forking */
-                            perror("shell");
-                        } else {
-                            /* Parent process */
-                            waitpid(pid, &exec_status, 0);
-                        }
-                        break;
-                    }
-
-                    free(full_path);
+            pid = fork();
+            if (pid == 0) {
+                /* Child process */
+                if (execvp(commands[0], commands) == -1) {
+                    perror("shell");
                 }
-                token = strtok(NULL, ":");
-            }
-
-            if (!found) {
-                fprintf(stderr, "shell: %s: command not found\n", commands[0]);
+                exit(EXIT_FAILURE);
+            } else if (pid < 0) {
+                /* Error forking */
+                perror("shell");
+            } else {
+                /* Parent process */
+                waitpid(pid, &exec_status, 0);
             }
 
             for (i = 0; commands[i] != NULL; i++) {
@@ -95,7 +71,7 @@ char **lsh_split_line(char *line) {
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, " \t\r\n\a"); /* Simplified delimiter */
+    token = strtok(line, " "); /* Simplified delimiter */
     while (token != NULL) {
         tokens[position] = token;
         position++;
@@ -109,9 +85,8 @@ char **lsh_split_line(char *line) {
             }
         }
 
-        token = strtok(NULL, " \t\r\n\a"); /* Simplified delimiter */
+        token = strtok(NULL, " "); /* Simplified delimiter */
     }
     tokens[position] = NULL;
     return tokens;
 }
-
