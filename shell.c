@@ -16,7 +16,7 @@ int main(void) {
     char *line;
     char **commands;
     int status = 1; /* Shell status (1: active, 0: exit) */
-    int i; /* Declare 'i' outside of the loop */
+    int i; /* Declare 'i' outside of the loop in C89 */
 
     while (status) {
         printf("($) ");
