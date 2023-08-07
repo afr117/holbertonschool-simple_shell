@@ -38,34 +38,7 @@ int main(void) {
                 }
             }
 
-            if (strcmp(commands[0], "ls") == 0 && commands[1] == NULL) {
-                lsh_execute(commands);
-            } else if (strcmp(commands[0], "ls") == 0 && strcmp(commands[1], "-l") == 0 && commands[2] == NULL) {
-                lsh_execute(commands);
-            } else if (strcmp(commands[0], "ls") == 0 && strcmp(commands[1], "-l") == 0 && commands[2] != NULL) {
-                pid_t pid;
-                int exec_status;
-
-                pid = fork();
-                if (pid == 0) {
-                    /* Child process */
-                    char *new_args[4];
-                    new_args[0] = "/bin/ls";
-                    new_args[1] = "-l";
-                    new_args[2] = commands[2];
-                    new_args[3] = NULL;
-                    if (execve(new_args[0], new_args, NULL) == -1) {
-                        perror("shell");
-                    }
-                    exit(EXIT_FAILURE);
-                } else if (pid < 0) {
-                    /* Error forking */
-                    perror("shell");
-                } else {
-                    /* Parent process */
-                    waitpid(pid, &exec_status, 0);
-                }
-            }
+            lsh_execute(commands);
 
             for (i = 0; commands[i] != NULL; i++) {
                 free(commands[i]); /* Free each command */
