@@ -6,15 +6,16 @@
 #include <sys/wait.h>
 
 #define LSH_TOK_BUFSIZE 64
+#define LSH_TOK_DELIM " \t\r\n\a"
 
 char *lsh_read_line(void);
 char **lsh_split_line(char *line);
-int lsh_execute(char **commands);
+int lsh_execute(char **args);
 
 int main(void) {
     char *line;
-    char **commands;
-    int status = 1; /* Shell status (1: active, 0: exit) */
+    char **args;
+    int status = 1;
     int i; /* Declare 'i' outside of the loop in C89 */
 
     while (status) {
@@ -23,18 +24,32 @@ int main(void) {
         if (!line)
             break;
 
-        commands = lsh_split_line(line);
-        if (commands) {
-            int exec_status = lsh_execute(commands);
+        args = lsh_split_line(line);
+        if (args) {
+            pid_t pid;
+            int exec_status;
 
-            for (i = 0; commands[i] != NULL; i++) {
-                free(commands[i]);
+            pid = fork();
+            if (pid == 0) {
+                /* Child process */
+                if (execvp(args[0], args) == -1) {
+                    perror("shell");
+                }
+                exit(EXIT_FAILURE);
+            } else if (pid < 0) {
+                /* Error forking */
+                perror("shell");
+            } else {
+                /* Parent process */
+                do {
+                    waitpid(pid, &exec_status, WUNTRACED);
+                } while (!WIFEXITED(exec_status) && !WIFSIGNALED(exec_status));
             }
-            free(commands);
 
-            if (exec_status == 0) {
-                break; /* Exit the loop on successful command execution */
+            for (i = 0; args[i] != NULL; i++) {
+                free(args[i]);
             }
+            free(args);
         }
         free(line);
     }
@@ -59,7 +74,7 @@ char **lsh_split_line(char *line) {
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, " \t\n"); /* Updated delimiter */
+    token = strtok(line, LSH_TOK_DELIM);
     while (token != NULL) {
         tokens[position] = token;
         position++;
@@ -73,33 +88,9 @@ char **lsh_split_line(char *line) {
             }
         }
 
-        token = strtok(NULL, " \t\n"); /* Updated delimiter */
+        token = strtok(NULL, LSH_TOK_DELIM);
     }
     tokens[position] = NULL;
     return tokens;
-}
-
-int lsh_execute(char **commands) {
-    pid_t pid;
-    int exec_status = 0; /* Return status for successful execution */
-
-    pid = fork();
-    if (pid == 0) {
-        /* Child process */
-        if (execvp(commands[0], commands) == -1) {
-            perror("shell");
-            exec_status = 1; /* Set exec_status to indicate failure */
-        }
-        exit(EXIT_FAILURE);
-    } else if (pid < 0) {
-        /* Error forking */
-        perror("shell");
-        exec_status = 1; /* Set exec_status to indicate failure */
-    } else {
-        /* Parent process */
-        waitpid(pid, NULL, 0);
-    }
-
-    return exec_status;
 }
 
