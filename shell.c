@@ -27,7 +27,6 @@ int main(void) {
         if (commands) {
             pid_t pid;
             int exec_status;
-            int found = 0;
             char *path, *token, *full_path;
 
             path = getenv("PATH");
@@ -40,7 +39,6 @@ int main(void) {
                     strcat(full_path, commands[0]);
 
                     if (access(full_path, X_OK) == 0) {
-                        found = 1;
                         pid = fork();
                         if (pid == 0) {
                             /* Child process */
@@ -61,10 +59,6 @@ int main(void) {
                     free(full_path);
                 }
                 token = strtok(NULL, ":");
-            }
-
-            if (!found) {
-                fprintf(stderr, "shell: %s: command not found\n", commands[0]);
             }
 
             for (i = 0; commands[i] != NULL; i++) {
