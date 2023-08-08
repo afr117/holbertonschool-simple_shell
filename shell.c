@@ -16,6 +16,7 @@ int main(void) {
     char **commands;
     int status = 1; /* Shell status (1: active, 0: exit) */
     int i; /* Declare 'i' outside of the loop in C89 */
+    pid_t pid; /* Move the declaration of pid here */
 
     while (status) {
         printf("($) ");
@@ -25,7 +26,6 @@ int main(void) {
 
         commands = lsh_split_line(line);
         if (commands) {
-            pid_t pid;
             int exec_status;
 
             pid = fork();
@@ -44,7 +44,7 @@ int main(void) {
             }
 
             for (i = 0; commands[i] != NULL; i++) {
-                free(commands[i]); /* Free each command */
+                free(commands[i]);
             }
             free(commands);
         }
