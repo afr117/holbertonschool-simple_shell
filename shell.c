@@ -6,16 +6,15 @@
 #include <sys/wait.h>
 
 #define LSH_TOK_BUFSIZE 64
-#define LSH_TOK_DELIM " \t\r\n\a"
 
 char *lsh_read_line(void);
 char **lsh_split_line(char *line);
-int lsh_execute(char **args);
+int lsh_execute(char **commands);
 
 int main(void) {
     char *line;
-    char **args;
-    int status = 1;
+    char **commands;
+    int status = 1; /* Shell status (1: active, 0: exit) */
     int i; /* Declare 'i' outside of the loop in C89 */
 
     while (status) {
@@ -24,21 +23,15 @@ int main(void) {
         if (!line)
             break;
 
-        args = lsh_split_line(line);
-        if (args) {
+        commands = lsh_split_line(line);
+        if (commands) {
             pid_t pid;
             int exec_status;
-
-            if (strcmp(args[0], "exit") == 0) {
-                free(line);
-                free(args);
-                exit(0);
-            }
 
             pid = fork();
             if (pid == 0) {
                 /* Child process */
-                if (execvp(args[0], args) == -1) {
+                if (execvp(commands[0], commands) == -1) {
                     perror("shell");
                 }
                 exit(EXIT_FAILURE);
@@ -47,15 +40,13 @@ int main(void) {
                 perror("shell");
             } else {
                 /* Parent process */
-                do {
-                    waitpid(pid, &exec_status, WUNTRACED);
-                } while (!WIFEXITED(exec_status) && !WIFSIGNALED(exec_status));
+                waitpid(pid, &exec_status, 0);
             }
 
-            for (i = 0; args[i] != NULL; i++) {
-                free(args[i]);
+            for (i = 0; commands[i] != NULL; i++) {
+                free(commands[i]); /* Free each command */
             }
-            free(args);
+            free(commands);
         }
         free(line);
     }
@@ -80,7 +71,7 @@ char **lsh_split_line(char *line) {
         exit(EXIT_FAILURE);
     }
 
-    token = strtok(line, LSH_TOK_DELIM);
+    token = strtok(line, " "); /* Simplified delimiter */
     while (token != NULL) {
         tokens[position] = token;
         position++;
@@ -94,9 +85,10 @@ char **lsh_split_line(char *line) {
             }
         }
 
-        token = strtok(NULL, LSH_TOK_DELIM);
+        token = strtok(NULL, " "); /* Simplified delimiter */
     }
     tokens[position] = NULL;
     return tokens;
 }
+
 
