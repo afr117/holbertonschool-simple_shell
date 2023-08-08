@@ -16,7 +16,6 @@ int main(void) {
     char **commands;
     int status = 1; /* Shell status (1: active, 0: exit) */
     int i; /* Declare 'i' outside of the loop in C89 */
-    pid_t pid; /* Move the declaration of pid here */
 
     while (status) {
         printf("($) ");
@@ -26,27 +25,16 @@ int main(void) {
 
         commands = lsh_split_line(line);
         if (commands) {
-            int exec_status;
-
-            pid = fork();
-            if (pid == 0) {
-                /* Child process */
-                if (execvp(commands[0], commands) == -1) {
-                    perror("shell");
-                }
-                exit(EXIT_FAILURE);
-            } else if (pid < 0) {
-                /* Error forking */
-                perror("shell");
-            } else {
-                /* Parent process */
-                waitpid(pid, &exec_status, 0);
-            }
+            int exec_status = lsh_execute(commands);
 
             for (i = 0; commands[i] != NULL; i++) {
                 free(commands[i]);
             }
             free(commands);
+
+            if (exec_status == 0) {
+                break; /* Exit the loop on successful command execution */
+            }
         }
         free(line);
     }
@@ -89,5 +77,29 @@ char **lsh_split_line(char *line) {
     }
     tokens[position] = NULL;
     return tokens;
+}
+
+int lsh_execute(char **commands) {
+    pid_t pid;
+    int exec_status = 0; /* Return status for successful execution */
+
+    pid = fork();
+    if (pid == 0) {
+        /* Child process */
+        if (execvp(commands[0], commands) == -1) {
+            perror("shell");
+            exec_status = 1; /* Set exec_status to indicate failure */
+        }
+        exit(EXIT_FAILURE);
+    } else if (pid < 0) {
+        /* Error forking */
+        perror("shell");
+        exec_status = 1; /* Set exec_status to indicate failure */
+    } else {
+        /* Parent process */
+        waitpid(pid, NULL, 0);
+    }
+
+    return exec_status;
 }
 
