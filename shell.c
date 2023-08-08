@@ -29,6 +29,12 @@ int main(void) {
             pid_t pid;
             int exec_status;
 
+            if (strcmp(args[0], "exit") == 0) {
+                free(line);
+                free(args);
+                exit(0);
+            }
+
             pid = fork();
             if (pid == 0) {
                 /* Child process */
