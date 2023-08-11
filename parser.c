@@ -16,6 +16,7 @@
  * Return: Array of strings containing separate commands, or NULL on failure.
  *         The last element of the array is set to NULL.
  */
+
 char **split_commands(char *input)
 {
 	int i = 0; /* Move variable declaration to the beginning */
