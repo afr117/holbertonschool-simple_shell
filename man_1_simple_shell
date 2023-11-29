@@ -1,0 +1,82 @@
+.TH man 1 "28 Jul 2023" "1.0" "simple_shell man page"
+
+.SH NAME
+simple_shell \- Custom UNIX command-line interpreter
+
+.SH SYNOPSIS
+.B simple_shell
+
+.SH DESCRIPTION
+The \fBsimple_shell\fR is a custom UNIX command-line interpreter, providing basic functionalities for executing commands, handling built-in commands, and supporting interactive and non-interactive modes.
+
+.SH USAGE
+.B simple_shell
+.RB [\fIcommands\fR]
+
+.SH COMMANDS
+The \fBsimple_shell\fR supports the following commands:
+
+.PP
+\fBexit\fR \- Exit the shell.
+\fBcd\fR \- Change the current working directory.
+
+.SH INTERACTIVE MODE
+To run the \fBsimple_shell\fR in interactive mode, simply execute the compiled binary. The shell will display a prompt ('$') indicating that it is ready to accept commands. Enter the commands at the prompt and press Enter to execute them.
+
+Example:
+.PP
+.B
+$ ./simple_shell
+$ /bin/ls
+file1 file2 file3
+$ echo "Hello, world!"
+Hello, world!
+$ exit
+
+.SH NON-INTERACTIVE MODE
+To run the \fBsimple_shell\fR in non-interactive mode, you can use input redirection ('<') or pipe ('|') to provide commands from a file or another command's output.
+
+Example with input redirection:
+.PP
+.B
+$ echo "/bin/ls" | ./simple_shell
+file1 file2 file3
+
+Example with a file containing commands:
+.PP
+.B
+$ cat commands.txt
+/bin/ls
+echo "Hello, world!"
+$ cat commands.txt | ./simple_shell
+file1 file2 file3
+Hello, world!
+
+.SH SUPPORTED FEATURES
+The \fBsimple_shell\fR supports the following features:
+
+.PP
+- Execution of external commands using \fBexecve\fR.
+- Handling of commands separated by ';' or '&&'.
+- Input/output redirection with '<' and '>'.
+- Pipelines with '|'.
+- Background execution with '&'.
+- Error messages similar to /bin/sh with the correct program name.
+
+.SH LIMITATIONS
+- The shell does not support environment variables.
+- The shell does not handle quotes or escape characters.
+- Some edge cases for parsing complex commands may not be handled.
+
+.SH AUTHORS
+.PP
+Written by [Alfred Rosado & Britt Herman].
+
+.SH REPORTING BUGS
+Report bugs to [your_email@example.com].
+
+.SH COPYRIGHT
+Copyright (c) [Year], [Your Name]
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.
+
