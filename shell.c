@@ -26,17 +26,19 @@ int main(void)
 		break;
 
 		commands = lsh_split_line(line);
-	if (commands) 
+	if (commands)
 	{
 		pid_t pid;
 			int exec_status;
 
-    		pid = fork();
-	if (pid == 0) {
+		pid = fork();
+	if (pid == 0)
+	{
 		/* Child process */
-	if (execvp(commands[0], commands) == -1) {
+	if (execvp(commands[0], commands) == -1)
+{
 		perror("shell");
- }
+}
 		exit(EXIT_FAILURE);
             } else if (pid < 0) {
                 /* Error forking */
