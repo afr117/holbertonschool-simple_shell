@@ -40,24 +40,24 @@ int main(void)
 		perror("shell");
 }
 		exit(EXIT_FAILURE);
-            } else if (pid < 0) {
-                /* Error forking */
-                perror("shell");
-            } else {
-                /* Parent process */
-                waitpid(pid, &exec_status, 0);
-            }
+		} else if (pid < 0) {
+		/* Error forking */
+			perror("shell");
+		} else {
+		/* Parent process */
+			waitpid(pid, &exec_status, 0);
+		}
 
-            for (i = 0; commands[i] != NULL; i++)
-	    {
-                free(commands[i]); /* Free each command */
-            }
-            free(commands);
-        }
-        free(line);
-    }
+	for (i = 0; commands[i] != NULL; i++)
+		{
+		free(commands[i]); /* Free each command */
+		}
+		free(commands);
+		}
+		free(line);
+		}
 
-    return 0;
+	return 0;
 }
 
 char *lsh_read_line(void) {
