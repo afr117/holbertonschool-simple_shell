@@ -11,11 +11,12 @@ char *lsh_read_line(void);
 char **lsh_split_line(char *line);
 int lsh_execute(char **commands);
 
-int main(void) {
-    char *line;
-    char **commands;
-    int status = 1; /* Shell status (1: active, 0: exit) */
-    int i; /* Declare 'i' outside of the loop in C89 */
+int main(void)
+{
+	char *line;
+	char **commands;
+	int status = 1; /* Shell status (1: active, 0: exit) */
+	int i; /* Declare 'i' outside of the loop in C89 */
 
     while (status) {
         printf("($) ");
