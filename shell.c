@@ -20,23 +20,24 @@ int main(void)
 
 	while (status)
 	{
-        	printf("($) ");
-        	line = lsh_read_line();
+		printf("($) ");
+		line = lsh_read_line();
 	if (!line)
 		break;
 
 		commands = lsh_split_line(line);
-	if (commands) {
+	if (commands) 
+	{
 		pid_t pid;
 			int exec_status;
 
-            pid = fork();
-            if (pid == 0) {
-                /* Child process */
-                if (execvp(commands[0], commands) == -1) {
-                    perror("shell");
-                }
-                exit(EXIT_FAILURE);
+    		pid = fork();
+	if (pid == 0) {
+		/* Child process */
+	if (execvp(commands[0], commands) == -1) {
+		perror("shell");
+ }
+		exit(EXIT_FAILURE);
             } else if (pid < 0) {
                 /* Error forking */
                 perror("shell");
@@ -45,7 +46,8 @@ int main(void)
                 waitpid(pid, &exec_status, 0);
             }
 
-            for (i = 0; commands[i] != NULL; i++) {
+            for (i = 0; commands[i] != NULL; i++)
+	    {
                 free(commands[i]); /* Free each command */
             }
             free(commands);
