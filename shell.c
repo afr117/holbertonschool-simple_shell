@@ -40,11 +40,13 @@ int main(void)
 		perror("shell");
 }
 		exit(EXIT_FAILURE);
-		} else if (pid < 0)
+		}
+		else if (pid < 0)
 {
 		/* Error forking */
 			perror("shell");
-		} else
+		}
+		else
 {
 		/* Parent process */
 			waitpid(pid, &exec_status, 0);
@@ -66,6 +68,7 @@ char *lsh_read_line(void)
 {
 	char *line = NULL;
 	size_t bufsize = 0;
+
 	getline(&line, &bufsize, stdin);
 	return (line);
 }
@@ -76,20 +79,24 @@ char **lsh_split_line(char *line)
 	char **tokens = malloc(bufsize * sizeof(char *));
 	char *token;
 
-	if (!tokens) {
+	if (!tokens)
+	{
 		fprintf(stderr, "shell: allocation error\n");
 		exit(EXIT_FAILURE);
 }
 
 	token = strtok(line, " "); /* Simplified delimiter */
-	while (token != NULL) {
+	while (token != NULL)
+{
 		tokens[position] = token;
 		position++;
 
-	if (position >= bufsize) {
+	if (position >= bufsize)
+	{
 		bufsize += LSH_TOK_BUFSIZE;
 		tokens = realloc(tokens, bufsize * sizeof(char *));
-	if (!tokens) {
+	if (!tokens)
+	{
 		fprintf(stderr, "shell: allocation error\n");
 		exit(EXIT_FAILURE);
 }
