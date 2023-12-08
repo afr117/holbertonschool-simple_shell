@@ -18,16 +18,17 @@ int main(void)
 	int status = 1; /* Shell status (1: active, 0: exit) */
 	int i; /* Declare 'i' outside of the loop in C89 */
 
-    while (status) {
-        printf("($) ");
-        line = lsh_read_line();
-        if (!line)
-            break;
+	while (status)
+	{
+        	printf("($) ");
+        	line = lsh_read_line();
+	if (!line)
+		break;
 
-        commands = lsh_split_line(line);
-        if (commands) {
-            pid_t pid;
-            int exec_status;
+		commands = lsh_split_line(line);
+	if (commands) {
+		pid_t pid;
+			int exec_status;
 
             pid = fork();
             if (pid == 0) {
